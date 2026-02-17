@@ -22,3 +22,9 @@ class SearchConfig(BaseModel):
     description: str
     type: str
     config: dict
+
+class DataLoaderConfig(BaseModel):
+    name: str
+    description: str
+    type: str
+    config: dict
