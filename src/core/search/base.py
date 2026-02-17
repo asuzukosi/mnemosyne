@@ -6,5 +6,5 @@ class BaseSearch(ABC):
         self._config = config
 
     @abstractmethod
-    def search(self, query: QueryData) -> SearchResult:
+    def search(self, query: QueryData, num_k:int=10) -> SearchResult:
         pass
