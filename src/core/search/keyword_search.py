@@ -11,9 +11,12 @@ class KeywordSearch(BaseSearch):
         data = self._data_loader.load()
         results = []
         for item in data:
-            if query.query.lower() == item.key.lower():
+            if self._compare_keys(query.query, item.key):
                 results.append(item)
                 # break when k items reached
                 if len(results) >= num_k:
                     break
         return SearchResult(query=query.query, context=query.context, results=results)
+    
+    def _compare_keys(self, key1: str, key2: str) -> bool:
+        return key1.lower() == key2.lower()
