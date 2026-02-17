@@ -16,7 +16,10 @@ class JSONLoader(BaseDataLoader):
     def load(self) -> list[DataItem]:
         with open(self._path, 'r') as f:
             data = json.load(f)
-        return [DataItem(id=item['id'] if 'id' in item else str(uuid.uuid4()), 
+        data_items = [DataItem(id=item['id'] if 'id' in item else str(uuid.uuid4()), 
                          key=item['key'], 
                          content=item['content'], 
                          metadata=item) for item in data]
+        
+        data_items = list(sorted(data_items, key=lambda x: x.id))
+        return data_items
