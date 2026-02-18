@@ -23,6 +23,14 @@ class SemanticSearch(BaseSearch):
         self._doc_map = defaultdict(str)
         self._embeddings_path = Path(__file__).parent / 'embeddings.npy'
 
+
+    def generate_embeddings(self, text: str) -> np.ndarray:
+        embeddings = self._model.encode([text])
+        return embeddings[0]
+
+    def embed_query(self, query: QueryData) -> np.ndarray:
+        return self.generate_embeddings(query.query)
+
     def build_embeddings(self, documents: List[DataItem]) -> List[np.ndarray]:
         self._documents = documents
         self._embeddings = []
@@ -32,12 +40,17 @@ class SemanticSearch(BaseSearch):
             self._embeddings.append(self.generate_embeddings(document.content))
         np.save(self._embeddings_path, self._embeddings)
         return self._embeddings
-
-
-    def generate_embeddings(self, text: str) -> np.ndarray:
-        embeddings = self._model.encode([text])
-        return embeddings[0]
-
+    
+    def load_or_build_embeddings(self, documents: List[DataItem]) -> List[np.ndarray]:
+        if self._embeddings_path.exists():
+            self._embeddings = np.load(self._embeddings_path)
+            self._documents = documents
+            self._doc_map = defaultdict(str)
+            for document in documents:
+                self._doc_map[document.id] = document.content
+        else:
+            self.build_embeddings(documents)
+        return self._embeddings
     
     def search(self, query: QueryData, num_k:int=10) -> SearchResult:
         pass
