@@ -1,8 +1,9 @@
 from src.core.index.base import BaseIndex
-from collections import defaultdict
+from collections import defaultdict, Counter
 from pathlib import Path
 from typing import List
 from src.core.data import DataItem
+import math
 import os
 import pickle
 from src.utils.logger import logger
@@ -14,14 +15,19 @@ class InvertedIndex(BaseIndex):
         self._docmap = {}
         self.index_path = Path(__file__).parent / 'index.pkl'
         self.docmap_path = Path(__file__).parent / 'docmap.pkl'
+        self.term_frequency_path = Path(__file__).parent / 'term_frequency.pkl'
+        self._term_frequency = defaultdict(Counter)
 
     def load(self):
         with open(self.index_path, 'rb') as f:
             self._index = pickle.load(f)
         with open(self.docmap_path, 'rb') as f:
             self._docmap = pickle.load(f)
+        with open(self.term_frequency_path, 'rb') as f:
+            self._term_frequency = pickle.load(f)
         logger.info(f"Index loaded from {self.index_path}")
         logger.info(f"Docmap loaded from {self.docmap_path}")
+        logger.info(f"Term frequency loaded from {self.term_frequency_path}")
 
     def get_documents(self, term: str) -> list[str]:
         return sorted(list(self._index[term]))
@@ -29,11 +35,22 @@ class InvertedIndex(BaseIndex):
     def _tokenize_text(self, text: str) -> list[str]:
         return [token for token in text.split() if token.isalpha()]
 
+    def get_idf(self, term: str) -> float:
+        token = self._tokenize_text(term)[0]
+        doc_count = len(self._docmap)
+        term_doc_count = len(self._index[token])
+        return math.log((doc_count + 1) / (term_doc_count + 1))
+
     def _add_document(self, doc_id: str, text: str):
         tokens = self._tokenize_text(text)
         for token in set(tokens):
             self._index[token].add(doc_id)
+        self._term_frequency[doc_id].update(tokens)
 
+    def get_term_frequency(self, doc_id: str, term: str) -> Counter:
+        token = self._tokenize_text(term)[0]
+        return self._term_frequency[doc_id].get(token, 0)
+    
     def build(self, data: List[DataItem]):
         for data_item in data:
             doc_id = data_item.id
@@ -52,6 +69,11 @@ class InvertedIndex(BaseIndex):
         with open(self.docmap_path, 'wb') as f:
             pickle.dump(self._docmap, f)
         logger.info(f"Docmap saved to {self.docmap_path}")
+        # save term frequency
+        os.makedirs(self.term_frequency_path, exist_ok=True)
+        with open(self.term_frequency_path, 'wb') as f:
+            pickle.dump(self._term_frequency, f)
+        logger.info(f"Term frequency saved to {self.term_frequency_path}")
 
 
     def _search_index(self, query: QueryData, num_k:int=10) -> SearchResult: # TODO: why are we indexing?
