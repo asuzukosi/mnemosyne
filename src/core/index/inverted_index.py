@@ -41,6 +41,12 @@ class InvertedIndex(BaseIndex):
         term_doc_count = len(self._index[token])
         return math.log((doc_count + 1) / (term_doc_count + 1))
 
+    def get_bm25_idf(self, term: str) -> float:
+        token = self._tokenize_text(term)[0]
+        doc_count = len(self._docmap)
+        term_doc_count = len(self._index[token])
+        return math.log((doc_count - term_doc_count + 0.5) / (term_doc_count + 0.5) + 1)
+
     def _add_document(self, doc_id: str, text: str):
         tokens = self._tokenize_text(text)
         for token in set(tokens):
