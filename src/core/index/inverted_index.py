@@ -9,6 +9,8 @@ import pickle
 from src.utils.logger import logger
 from src.core.data import QueryData, SearchResult
 
+BM25_K1 = 1.2
+
 class InvertedIndex(BaseIndex):
     def __init__(self):
         self._index = defaultdict(set)
@@ -46,6 +48,10 @@ class InvertedIndex(BaseIndex):
         doc_count = len(self._docmap)
         term_doc_count = len(self._index[token])
         return math.log((doc_count - term_doc_count + 0.5) / (term_doc_count + 0.5) + 1)
+    
+    def get_bm25_tf(self, doc_id: str, term: str) -> float:
+        tf = self.get_term_frequency(doc_id, term)
+        return tf * (BM25_K1 + 1) / (tf + BM25_K1)
 
     def _add_document(self, doc_id: str, text: str):
         tokens = self._tokenize_text(text)
