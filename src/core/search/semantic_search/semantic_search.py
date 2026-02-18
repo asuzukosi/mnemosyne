@@ -8,7 +8,7 @@ from collections import defaultdict
 from typing import List
 from src.data_loader.base import DataItem
 from pathlib import Path
-
+from src.utils.vector_ops import cosine_similarity
 
 class SemanticSearch(BaseSearch):
     def __init__(self, config: SearchConfig, data_loader: BaseDataLoader, index: BaseIndex):
@@ -48,9 +48,15 @@ class SemanticSearch(BaseSearch):
             self._doc_map = defaultdict(str)
             for document in documents:
                 self._doc_map[document.id] = document.content
+                return self._embeddings
         else:
-            self.build_embeddings(documents)
-        return self._embeddings
+            return self.build_embeddings(documents)
     
     def search(self, query: QueryData, num_k:int=10) -> SearchResult:
-        pass
+        query_embedding = self.embed_query(query.query)
+        scores = defaultdict(float)
+        for embedding, doc_id in zip(self._embeddings, self._documents):
+            scores[doc_id] = cosine_similarity(query_embedding, embedding)
+        results = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:num_k]
+        return SearchResult(query=query.query, context=query.context, results=[self._doc_map[doc_id] for doc_id, _ in results])
+        
