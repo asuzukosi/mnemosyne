@@ -49,7 +49,11 @@ class InvertedIndex(BaseIndex):
 
     def get_term_frequency(self, doc_id: str, term: str) -> Counter:
         token = self._tokenize_text(term)[0]
-        return self._term_frequency[doc_id].get(token, 0)
+        return self._term_frequency[doc_id].get(token, 0) / len(self._term_frequency[doc_id].keys()) # normalize by the number of tokens in the document
+    
+
+    def get_tf_idf(self, doc_id: str, term: str) -> float:
+        return self.get_term_frequency(doc_id, term) * self.get_idf(term)
     
     def build(self, data: List[DataItem]):
         for data_item in data:
