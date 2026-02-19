@@ -28,3 +28,9 @@ class DataLoaderConfig(BaseModel):
     description: str
     type: str
     config: dict
+
+class ChunkerConfig(BaseModel):
+    name: str
+    description: str
+    type: str
+    config: dict
