@@ -22,6 +22,9 @@ class SearchConfig(BaseModel):
     description: str
     type: str
     config: dict
+    chunk_size: int
+
+
 
 class DataLoaderConfig(BaseModel):
     name: str
