@@ -1,1 +1,4 @@
 openai
+sentence-transformers
+numpy
+pillow

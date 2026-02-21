@@ -64,3 +64,10 @@ class QueryAugmentationConfig(BaseModel):
     description: str
     type: str
     config: dict
+
+
+class ImageEmbeddingConfig(BaseModel):
+    name: str
+    description: str
+    type: str
+    config: dict
