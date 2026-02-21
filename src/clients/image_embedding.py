@@ -1,7 +1,6 @@
 from src.core.data import ImageEmbeddingConfig
 from PIL import Image
 import numpy as np
-from transformers import AutoModel
 
 class ImageEmbeddingClient:
     def __init__(self, config: ImageEmbeddingConfig):
