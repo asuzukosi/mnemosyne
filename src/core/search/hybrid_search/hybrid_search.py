@@ -31,8 +31,16 @@ class HybridSearch(BaseSearch):
         # TODO: combine the scores from both the bm25 scores and the semantic scores
         raise NotImplementedError
     
-    def rrf_search(self, query: QueryData, num_k:int=10) -> SearchResult:
+    def _rrf_combine_results(self, bm25_results: List[SearchResult], semantic_results: List[SearchResult]) -> List[SearchResult]:
+        # TODO: combine the scores from both the bm25 scores and the semantic scores
         raise NotImplementedError
+    
+    def rrf_search(self, query: QueryData, num_k:int=10) -> SearchResult:
+        bm25_results = self._bm_25_search(query, num_k * 100)
+        semantic_results = self._semantic_search(query, num_k * 100)
+        combined_results = self._rrf_combine_results(bm25_results, semantic_results)
+        weighted_results = self.hybrid_score(self.normalize_scores(combined_results), self.normalize_scores(semantic_results))
+        return weighted_results
     
     def normalize_scores(self, scores: List[float]) -> List[float]:
         min_score = min(scores)
