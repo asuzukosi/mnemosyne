@@ -16,6 +16,12 @@ class SearchResult(BaseModel):
     context: str
     results: list[DataItem]
 
+class RerankerConfig(BaseModel):
+    name: str
+    description: str
+    type: str
+    config: dict
+
 
 class SearchConfig(BaseModel):
     name: str
