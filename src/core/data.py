@@ -24,7 +24,14 @@ class SearchConfig(BaseModel):
     config: dict
     chunk_size: int
 
-
+class LLMConfig(BaseModel):
+    name: str
+    model_name: str
+    api_key: str
+    base_url: str
+    description: str
+    type: str
+    config: dict
 
 class DataLoaderConfig(BaseModel):
     name: str
@@ -33,6 +40,13 @@ class DataLoaderConfig(BaseModel):
     config: dict
 
 class ChunkerConfig(BaseModel):
+    name: str
+    description: str
+    type: str
+    config: dict
+
+
+class QueryAugmentationConfig(BaseModel):
     name: str
     description: str
     type: str
