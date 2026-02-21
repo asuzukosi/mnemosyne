@@ -7,9 +7,11 @@ class LLMQueryAugmentation(BaseQueryAugmentation):
         super().__init__(config)
         self._llm_client = LLMClient(config=self._config)
 
-    async def augment_query(self, query: QueryData) -> QueryData:
+    async def augment_query(self, query: QueryData, expand_query: bool=True) -> QueryData:
         augmented_query = await self._spelling_correction(query)
         augmented_query = await self._query_rewriting(augmented_query)
+        if expand_query:
+            augmented_query = await self._query_expansion(augmented_query)
         return augmented_query
     
     async def _spelling_correction(self, query: QueryData) -> QueryData:
@@ -24,3 +26,8 @@ class LLMQueryAugmentation(BaseQueryAugmentation):
         response: str = await self._llm_client.generate_response_with_context(prompt, system_prompt)
         return QueryData(query=response, context=response)
     
+    async def _query_expansion(self, query: QueryData) -> QueryData:
+        system_prompt = "You are a helpful assistant that expands the user's query to include more relevant terms. return the expanded query only. do not return any other text or explanation."
+        prompt = f"Expand the following query to include more relevant terms: {query.query}"
+        response: str = await self._llm_client.generate_response_with_context(prompt, system_prompt)
+        return QueryData(query=response, context=response)
